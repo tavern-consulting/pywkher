@@ -1,4 +1,4 @@
-from os import chmod, environ, path as os_path
+from os import environ, path
 from subprocess import call as call_subprocess
 from tempfile import NamedTemporaryFile
 
@@ -10,24 +10,32 @@ def generate_pdf(html='', url=''):
     if html and url:
         raise ValueError('Must pass HTML or specify a URL, not both')
 
-    wkhtmltopdf_default = 'wkhtmltopdf-heroku'
+    current_directory = path.abspath(path.dirname(__file__))
+    wkhtmltopdf_default = path.join(
+        current_directory,
+        '..',
+        'bin',
+        'wkhtmltopdf-heroku'
+    )
 
     # Reference command
     wkhtmltopdf_cmd = environ.get('WKHTMLTOPDF_CMD', wkhtmltopdf_default)
 
-    # Set up return file
-    pdf_file = NamedTemporaryFile(delete=False, suffix='.pdf')
+    if url:
+        with NamedTemporaryFile(suffix='.pdf', mode='rwb+') as pdf_file:
+            call_subprocess([wkhtmltopdf_cmd, '-q', url, pdf_file.name])
+            pdf_file.seek(0)
+            return pdf_file.read()
 
-    if html:
         # Save the HTML to a temp file
-        html_file = NamedTemporaryFile(delete=False, suffix='.html')
+    with NamedTemporaryFile(suffix='.html', mode='w') as html_file:
         html_file.write(html)
-        html_file.close()
-
-        # wkhtmltopdf
-        call_subprocess([wkhtmltopdf_cmd, '-q', html_file.name, pdf_file.name])
-    else:
-        # wkhtmltopdf, using URL
-        call_subprocess([wkhtmltopdf_cmd, '-q', url, pdf_file.name])
-
-    return pdf_file
+        html_file.flush()
+        html_file.seek(0)
+        with NamedTemporaryFile(suffix='.pdf', mode='rwb+') as pdf_file:
+            # wkhtmltopdf
+            call_subprocess(
+                [wkhtmltopdf_cmd, '-q', html_file.name, pdf_file.name],
+            )
+            pdf_file.seek(0)
+            return pdf_file.read()
