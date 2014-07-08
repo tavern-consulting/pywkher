@@ -29,7 +29,7 @@ def generate_pdf(html='', url=''):
 
         # Save the HTML to a temp file
     with NamedTemporaryFile(suffix='.html', mode='w') as html_file:
-        html_file.write(html)
+        html_file.write(html.encode('utf-8'))
         html_file.flush()
         html_file.seek(0)
         with NamedTemporaryFile(suffix='.pdf', mode='rwb+') as pdf_file:
