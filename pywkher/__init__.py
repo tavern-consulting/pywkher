@@ -10,10 +10,8 @@ def generate_pdf(html='', url=''):
     if html and url:
         raise ValueError('Must pass HTML or specify a URL, not both')
 
-    current_directory = path.abspath(path.dirname(__file__))
     wkhtmltopdf_default = path.join(
-        current_directory,
-        '..',
+        environ.get('VIRTUAL_ENV'),
         'bin',
         'wkhtmltopdf-heroku'
     )
