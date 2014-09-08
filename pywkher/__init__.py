@@ -1,4 +1,4 @@
-from os import environ, path
+from os import environ
 from subprocess import call as call_subprocess
 from tempfile import NamedTemporaryFile
 
@@ -10,11 +10,7 @@ def generate_pdf(html='', url=''):
     if html and url:
         raise ValueError('Must pass HTML or specify a URL, not both')
 
-    wkhtmltopdf_default = path.join(
-        environ.get('VIRTUAL_ENV'),
-        'bin',
-        'wkhtmltopdf-heroku'
-    )
+    wkhtmltopdf_default = '/app/.heroku/python/bin/wkhtmltopdf-heroku'
 
     # Reference command
     wkhtmltopdf_cmd = environ.get('WKHTMLTOPDF_CMD', wkhtmltopdf_default)
